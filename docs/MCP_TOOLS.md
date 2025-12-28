@@ -119,7 +119,7 @@ Create a new checkpoint.
 }
 ```
 
-### undu_undo
+### undu_back
 
 Go back to a previous checkpoint. **Warning: Discards unsaved changes!**
 

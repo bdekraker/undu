@@ -192,14 +192,14 @@ ${style.bold('Commands:')}
   ${style.info('(none)')}              Show status (default)
   ${style.info('init')}                Initialize undu in current directory
   ${style.info('save')} ${style.muted('<message>')}     Create a named checkpoint
-  ${style.info('undo')} ${style.muted('[n]')}           Go back n steps (default: 1)
+  ${style.info('back')} ${style.muted('[n]')}           Go back n steps (default: 1)
   ${style.info('goto')} ${style.muted('<name|id>')}     Jump to a checkpoint
   ${style.info('history')}             Show timeline
   ${style.info('diff')}                Show changes since last save
   ${style.info('peek')} ${style.muted('<name|id>')}     Preview a checkpoint
 
 ${style.bold('Aliases:')}
-  ${style.muted('s')}  = save    ${style.muted('u')}  = undo    ${style.muted('h')}  = history
+  ${style.muted('s')}  = save    ${style.muted('b')}  = back    ${style.muted('h')}  = history
   ${style.muted('d')}  = diff    ${style.muted('g')}  = goto    ${style.muted('p')}  = peek
 
 ${style.bold('Options:')}
@@ -209,7 +209,7 @@ ${style.bold('Options:')}
 
 ${style.bold('Examples:')}
   ${style.muted('$')} undu save "login working"
-  ${style.muted('$')} undu undo 3
+  ${style.muted('$')} undu back 3
   ${style.muted('$')} undu goto "before refactor"
   ${style.muted('$')} undu history --json
 

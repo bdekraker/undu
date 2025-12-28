@@ -107,8 +107,8 @@ const TOOLS = [
     }
   },
   {
-    name: "undu_undo",
-    description: "Undo changes by going back to a previous checkpoint. WARNING: This will discard current unsaved changes!",
+    name: "undu_back",
+    description: "Go back to a previous checkpoint. WARNING: This will discard current unsaved changes!",
     inputSchema: {
       type: "object",
       properties: {
@@ -313,23 +313,23 @@ async function handleTool(name: string, args: Record<string, unknown>): Promise<
       };
     }
 
-    case "undu_undo": {
+    case "undu_back": {
       const steps = (args.steps as number) || 1;
 
       const result = await UnduStore.find(path);
       if (!result.ok) throw new Error(result.error);
       const store = result.value;
-      const undoResult = await store.undo(steps);
+      const backResult = await store.undo(steps);  // Engine still uses 'undo' internally
       store.close();
 
-      if (!undoResult.ok) throw new Error(undoResult.error);
+      if (!backResult.ok) throw new Error(backResult.error);
 
       return {
         success: true,
         restoredTo: {
-          id: undoResult.value.id,
-          message: undoResult.value.message,
-          timestamp: new Date(undoResult.value.timestamp).toISOString()
+          id: backResult.value.id,
+          message: backResult.value.message,
+          timestamp: new Date(backResult.value.timestamp).toISOString()
         }
       };
     }

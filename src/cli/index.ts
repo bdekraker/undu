@@ -24,7 +24,9 @@ const VERSION = "0.0.1";
 // Command aliases
 const ALIASES: Record<string, string> = {
   s: 'save',
-  u: 'undo',
+  b: 'back',
+  u: 'back',      // 'u' also works for back
+  undo: 'back',   // backwards compatibility
   h: 'history',
   d: 'diff',
   g: 'goto',
@@ -170,7 +172,7 @@ async function cmdStatus(json: boolean): Promise<number> {
   print("");
   print(style.muted("  Quick actions:"));
   print(`    ${style.info('undu save "..."')}   Save these changes`);
-  print(`    ${style.info('undu undo')}         Discard changes`);
+  print(`    ${style.info('undu back')}         Discard changes`);
   print(`    ${style.info('undu diff')}         See what changed`);
   print("");
 
@@ -216,7 +218,7 @@ async function cmdSave(message: string, json: boolean): Promise<number> {
   return 0;
 }
 
-async function cmdUndo(steps: number, json: boolean): Promise<number> {
+async function cmdBack(steps: number, json: boolean): Promise<number> {
   const result = await UnduStore.find(process.cwd());
   if (!result.ok) {
     if (json) jsonOutput({ ok: false, error: result.error });
@@ -225,20 +227,20 @@ async function cmdUndo(steps: number, json: boolean): Promise<number> {
   }
 
   const store = result.value;
-  const undoResult = await store.undo(steps);
+  const backResult = await store.undo(steps);  // Engine method still called 'undo'
   store.close();
 
-  if (!undoResult.ok) {
-    if (json) jsonOutput({ ok: false, error: undoResult.error });
-    else printError(undoResult.error);
+  if (!backResult.ok) {
+    if (json) jsonOutput({ ok: false, error: backResult.error });
+    else printError(backResult.error);
     return 1;
   }
 
   if (json) {
-    jsonOutput({ ok: true, restoredTo: undoResult.value });
+    jsonOutput({ ok: true, restoredTo: backResult.value });
   } else {
-    printSuccess(`Restored to: "${undoResult.value.message}"`);
-    print(style.muted(`  ${relativeTime(undoResult.value.timestamp)}`));
+    printSuccess(`Restored to: "${backResult.value.message}"`);
+    print(style.muted(`  ${relativeTime(backResult.value.timestamp)}`));
   }
 
   return 0;
@@ -441,9 +443,9 @@ async function main(): Promise<number> {
     case 'save':
       return cmdSave(cmdArgs.join(' '), flags.json);
 
-    case 'undo':
+    case 'back':
       const steps = parseInt(cmdArgs[0]) || 1;
-      return cmdUndo(steps, flags.json);
+      return cmdBack(steps, flags.json);
 
     case 'goto':
       return cmdGoto(cmdArgs.join(' '), flags.json);

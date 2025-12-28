@@ -54,8 +54,8 @@ Your Project Timeline
 ```bash
 undu                          # Show status (most common need)
 undu save "login working"     # Create a named checkpoint
-undu undo                     # Go back one step
-undu undo 5                   # Go back 5 steps
+undu back                     # Go back one step
+undu back 5                   # Go back 5 steps
 undu goto "before refactor"   # Jump to a named checkpoint
 undu goto 2h                  # Go back 2 hours
 undu history                  # See the timeline
@@ -68,9 +68,9 @@ undu sync                     # Backup to cloud (or auto)
 | Task | Git | Undu |
 |------|-----|------|
 | Save my work | `git add -A && git commit -m "..."` | `undu save "..."` |
-| Go back | `git checkout HEAD~3` (scary) | `undu undo 3` |
+| Go back | `git checkout HEAD~3` (scary) | `undu back 3` |
 | See history | `git log --oneline` | `undu history` |
-| Undo one file | `git checkout -- file.py` (which checkout?) | `undu undo --file file.py` |
+| Undo one file | `git checkout -- file.py` (which checkout?) | `undu back --file file.py` |
 | Backup to cloud | `git push origin main` | happens automatically |
 | What changed? | `git diff HEAD~1` | `undu diff` |
 | Experiment safely | `git checkout -b feature; ...; git merge` | `undu try "experiment"` |
@@ -79,8 +79,8 @@ undu sync                     # Backup to cloud (or auto)
 
 ```bash
 undu s "message"    # save
-undu u              # undo
-undu u 3            # undo 3
+undu b              # back
+undu b 3            # back 3
 undu h              # history
 undu d              # diff
 undu g "name"       # goto
@@ -100,12 +100,12 @@ undu peek "before refactor"
 # See it without committing to it
 ```
 
-### 2. Smart Undo with Scope
+### 2. Smart Back with Scope
 
 ```bash
-undu undo --file auth.py      # Undo changes to just this file
-undu undo --last-hour         # Undo everything from the last hour
-undu undo --keep login.py     # Undo everything EXCEPT this file
+undu back --file auth.py      # Undo changes to just this file
+undu back --last-hour         # Undo everything from the last hour
+undu back --keep login.py     # Undo everything EXCEPT this file
 ```
 
 ### 3. Natural Language Interface
@@ -200,7 +200,7 @@ $ undu
 
   Quick actions:
     undu save "..."   Save these changes
-    undu undo         Discard changes
+    undu back         Discard changes
     undu diff         See what changed
 ```
 
@@ -217,7 +217,7 @@ undu diff --json          # Machine-readable diff
 **Exit Codes:**
 - `0` — Success
 - `1` — Error (with message)
-- `2` — Nothing to do (e.g., `undu undo` with no changes)
+- `2` — Nothing to do (e.g., `undu back` with no changes)
 
 **Non-TTY Detection:**
 - Colors disabled automatically when piped
@@ -238,7 +238,7 @@ const tools = {
   undu_history: "List timeline with checkpoints and auto-saves",
   undu_diff:    "Show what changed between two points",
   undu_save:    "Create a named checkpoint",
-  undu_undo:    "Revert to previous state",
+  undu_back:    "Revert to previous state",
   undu_goto:    "Jump to specific checkpoint by name or time",
   undu_peek:    "Preview a checkpoint without switching",
   undu_search:  "Find checkpoint where specific code existed"

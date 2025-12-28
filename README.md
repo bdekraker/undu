@@ -6,7 +6,7 @@
 
 ```bash
 undu save "login working"    # Save your work
-undu undo                    # Go back one step
+undu back                    # Go back one step
 undu history                 # See your timeline
 ```
 
@@ -68,7 +68,7 @@ bun run build
               └─────────┬─────────┘                  │
                         │                            │
                         ▼ something broke!           │
-              ┌───────────────────┐    undu undo     │
+              ┌───────────────────┐    undu back     │
               │    What now?      │──────────────────┘
               └───────────────────┘
 ```
@@ -85,7 +85,7 @@ undu save "added user authentication"
 undu history
 
 # Something broke? Go back
-undu undo
+undu back
 
 # Jump to a specific checkpoint
 undu goto "added user authentication"
@@ -98,7 +98,7 @@ undu goto "added user authentication"
 | `undu` | | Show status (default) |
 | `undu init` | `undu i` | Initialize repository |
 | `undu save "msg"` | `undu s "msg"` | Create checkpoint |
-| `undu undo [n]` | `undu u [n]` | Go back n steps |
+| `undu back [n]` | `undu b [n]` | Go back n steps |
 | `undu goto "name"` | `undu g "name"` | Jump to checkpoint |
 | `undu history` | `undu h` | Show timeline |
 | `undu diff` | `undu d` | Show changes |
@@ -276,7 +276,7 @@ Edit `.undu/config.toml` to customize.
   │ Task               │ Git                             │ undu             │
   ├────────────────────┼─────────────────────────────────┼──────────────────┤
   │ Save work          │ git add -A && git commit -m "." │ undu save "..."  │
-  │ Go back            │ git checkout HEAD~3             │ undu undo 3      │
+  │ Go back            │ git checkout HEAD~3             │ undu back 3      │
   │ See history        │ git log --oneline               │ undu history     │
   │ What changed?      │ git diff HEAD~1                 │ undu diff        │
   └────────────────────┴─────────────────────────────────┴──────────────────┘
