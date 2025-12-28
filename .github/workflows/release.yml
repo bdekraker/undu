@@ -85,8 +85,8 @@ jobs:
         run: |
           echo "=== Files in root ==="
           ls -la
-          echo "=== README.md content preview ==="
-          head -20 README.md
+          echo "=== readme.md content preview ==="
+          head -20 readme.md
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -113,8 +113,8 @@ jobs:
         run: |
           echo "=== All files to be published ==="
           npm pack --dry-run
-          echo "=== README.md still exists? ==="
-          cat README.md | head -5
+          echo "=== readme.md still exists? ==="
+          cat readme.md | head -5
 
       - name: Publish to npm with provenance
         run: npm publish --provenance --access public
