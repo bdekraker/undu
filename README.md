@@ -82,7 +82,7 @@ undu does exactly that. Nothing more, nothing less.
 npm install -g undu
 ```
 
-Works immediately on **Windows**. On Mac/Linux, requires [Bun](https://bun.sh) runtime.
+Works on **Windows, macOS, and Linux** — no additional runtime required.
 
 ### Standalone Binary
 
