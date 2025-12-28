@@ -1,6 +1,6 @@
 {
   "name": "undu",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Simple version control for humans. Undo anything.",
   "keywords": ["version-control", "undo", "backup", "vcs", "git-alternative", "cli"],
   "author": "Benjamin DeKraker <aries.benjamin@gmail.com>",
