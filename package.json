@@ -2,7 +2,7 @@
   "name": "undu",
   "version": "0.0.10",
   "description": "Simple version control for humans. Undo anything.",
-  "readme": "readme.md",
+  "readme": "README.md",
   "keywords": ["version-control", "undo", "backup", "vcs", "git-alternative", "cli"],
   "author": "Benjamin DeKraker <aries.benjamin@gmail.com>",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "undu": "./bin/undu.js"
   },
   "files": [
-    "readme.md",
+    "README.md",
     "bin/",
     "src/",
     "dist/bin/"
