@@ -283,13 +283,33 @@ Edit `.undu/config.toml` to customize.
   └────────────────────┴─────────────────────────────────┴──────────────────┘
 ```
 
+## Auto-Save Mode
+
+Never lose work again. Run `undu watch` and undu will automatically save your changes:
+
+```bash
+$ undu watch
+
+  undu watching: my-project
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Auto-saving every 30 seconds of inactivity
+  Press Ctrl+C to stop (your work is still safe)
+
+  ○ Auto-saved at 2:34:15 PM (3 files)
+  ○ Auto-saved at 2:35:02 PM (1 files)
+```
+
+Auto-saves appear in your timeline as `○` (vs `●` for manual checkpoints). They're pruned automatically to save space while keeping recent history dense.
+
 ## Roadmap
 
-- [ ] Auto-save daemon (background file watching)
-- [ ] Cloud sync
-- [ ] VS Code extension
+- [x] Auto-save daemon (background file watching)
+- [ ] Smart large file handling (skip >50MB, auto-ignore binaries)
 - [ ] Natural language commands ("go back to when tests passed")
 - [ ] Parallel timelines (branch-like behavior)
+- [ ] Cloud sync
+- [ ] VS Code extension
 
 ## License
 

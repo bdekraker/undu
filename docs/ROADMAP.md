@@ -674,15 +674,149 @@ $ undu clone my-project
 
 ---
 
+# Feature 5: Large File & Binary Handling
+
+## The Problem
+
+Currently undu tracks ALL files the same way — including large media files like
+videos, images, and compiled binaries. This can cause:
+
+1. **Storage bloat**: A 500MB video stored on every save
+2. **Slow saves**: Reading/hashing large files takes time
+3. **No delta compression**: Unlike git, we store full copies (deduped, but still)
+
+## The Philosophy
+
+> "Zero concepts to start — works immediately, learn as needed."
+
+Users shouldn't have to configure anything for a reasonable experience. undu should
+be smart about large files by default.
+
+## Proposed Solution
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  SMART FILE HANDLING                                                    │
+  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+  │                                                                         │
+  │  Small files (<1MB)        Track normally                               │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Full content stored                                                  │
+  │  • SHA-256 deduplication                                                │
+  │  • Instant restore                                                      │
+  │                                                                         │
+  │  Medium files (1-50MB)     Track with warning                           │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Still tracked by default                                             │
+  │  • Show size in status output                                           │
+  │  • Suggest adding to ignore if appropriate                              │
+  │                                                                         │
+  │  Large files (>50MB)       Skip by default                              │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Auto-add to ignore list                                              │
+  │  • Warn user on first encounter                                         │
+  │  • Can override with --include-large                                    │
+  │                                                                         │
+  │  Binary detection          Smart defaults                               │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Auto-ignore common binary extensions                                 │
+  │  • .mp4, .mov, .avi, .mkv (video)                                       │
+  │  • .zip, .tar, .gz, .rar (archives)                                     │
+  │  • .exe, .dll, .so, .dylib (binaries)                                   │
+  │  • .psd, .sketch, .fig (design files)                                   │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+## User Experience
+
+```bash
+# Status shows large file warnings
+$ undu
+
+  undu | my-project
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  3 files changed since "Login working"
+
+    M  src/auth.py
+    A  src/utils.py
+    !  assets/demo.mp4 (skipped: 156 MB)
+
+  Tip: Large files are auto-skipped. See 'undu config' to change.
+
+# Explicit include if needed
+$ undu save "with video" --include-large
+
+# Configure thresholds
+$ undu config set maxFileSize 100MB
+```
+
+## Config Options
+
+```toml
+# .undu/config.toml
+
+[files]
+maxFileSize = "50MB"           # Skip files larger than this
+warnFileSize = "1MB"           # Warn about files larger than this
+includeLarge = false           # Set true to track all files
+
+# Auto-ignore these extensions (in addition to ignore list)
+binaryExtensions = [
+  ".mp4", ".mov", ".avi", ".mkv", ".webm",
+  ".zip", ".tar", ".gz", ".rar", ".7z",
+  ".exe", ".dll", ".so", ".dylib",
+  ".psd", ".sketch", ".fig", ".ai",
+  ".pdf",  # Optional - some want to track these
+]
+```
+
+## Implementation
+
+```typescript
+// In scanFiles() or save():
+
+async function shouldTrackFile(path: string, stats: Stats): Promise<TrackDecision> {
+  const ext = extname(path).toLowerCase();
+  const size = stats.size;
+
+  // Check binary extensions
+  if (config.binaryExtensions.includes(ext)) {
+    return { track: false, reason: 'binary-extension' };
+  }
+
+  // Check size limits
+  if (size > config.maxFileSize) {
+    return { track: false, reason: 'too-large', size };
+  }
+
+  if (size > config.warnFileSize) {
+    return { track: true, warn: true, size };
+  }
+
+  return { track: true };
+}
+```
+
+---
+
 # Priority Order
 
 ```
   ┌─────────────────────────────────────────────────────────────────────────┐
   │                                                                         │
-  │  PRIORITY 1: Auto-Save Daemon                                           │
+  │  PRIORITY 1: Auto-Save Daemon  ✓ DONE                                   │
   │  ───────────────────────────────────────────────────────────────────    │
   │  This IS the core promise. "Nothing is ever lost."                      │
   │  Without this, undu is just git with nicer syntax.                      │
+  │                                                                         │
+  │                                                                         │
+  │  PRIORITY 1.5: Large File & Binary Handling  ← NEXT                     │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  Smart defaults for media files and binaries.                           │
+  │  Skip >50MB files, auto-ignore common binary extensions.                │
   │                                                                         │
   │                                                                         │
   │  PRIORITY 2: Natural Language (Phase 1)                                 │
