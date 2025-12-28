@@ -46,17 +46,31 @@ bun run build
 
 ## Quick Start
 
-```mermaid
-graph LR
-    A[Start Project] -->|undu init| B[Initialized]
-    B -->|make changes| C[Work...]
-    C -->|undu save| D["Checkpoint ●"]
-    D -->|more changes| E[Work...]
-    E -->|something broke!| F{What now?}
-    F -->|undu undo| D
-    F -->|undu goto| D
-    style D fill:#4ade80
-    style F fill:#fbbf24
+```
+    ┌─────────────┐     undu init      ┌─────────────┐
+    │ Your Project│ ─────────────────▶ │ Initialized │
+    └─────────────┘                    └──────┬──────┘
+                                              │
+                        ┌─────────────────────┘
+                        ▼
+              ┌───────────────────┐
+              │   Make changes    │◀─────────────────┐
+              └─────────┬─────────┘                  │
+                        │                            │
+                        ▼ undu save "..."            │
+              ┌───────────────────┐                  │
+              │   ● Checkpoint    │                  │
+              └─────────┬─────────┘                  │
+                        │                            │
+                        ▼                            │
+              ┌───────────────────┐                  │
+              │   More changes    │                  │
+              └─────────┬─────────┘                  │
+                        │                            │
+                        ▼ something broke!           │
+              ┌───────────────────┐    undu undo     │
+              │    What now?      │──────────────────┘
+              └───────────────────┘
 ```
 
 ```bash
@@ -94,61 +108,93 @@ undu goto "added user authentication"
 
 Forget branches and staging areas. undu has just one concept: **a timeline**.
 
-```mermaid
-graph TB
-    subgraph "undu: Simple Timeline"
-        NOW["◆ Now<br/>(unsaved changes)"]
-        C3["● Login working!<br/>10 min ago"]
-        C2["● Before refactor<br/>1 hour ago"]
-        C1["● First version<br/>yesterday"]
-        NOW --> C3 --> C2 --> C1
-    end
+```
+  ┌─────────────────────────────────────────────────────────────┐
+  │                                                             │
+  │   Your Timeline                                             │
+  │   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+  │                                                             │
+  │   ◆ Now (unsaved changes)                                   │
+  │   │                                                         │
+  │   ● "Login working!" ─────────────────────── 10 min ago     │
+  │   │                                                         │
+  │   ● "Before refactor" ────────────────────── 1 hour ago     │
+  │   │                                                         │
+  │   ● "First working version" ──────────────── yesterday      │
+  │                                                             │
+  │   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │
+  │                                                             │
+  └─────────────────────────────────────────────────────────────┘
 ```
 
 **That's it.** Save checkpoints. Go back when needed.
 
 ### Git vs undu
 
-```mermaid
-graph LR
-    subgraph "Git Mental Model"
-        direction TB
-        WD[Working Dir] --> SA[Staging Area]
-        SA --> LC[Local Commits]
-        LC --> RB[Remote Branches]
-        LC --> B1[feature-1]
-        LC --> B2[feature-2]
-        B1 -.->|merge| LC
-    end
-
-    subgraph "undu Mental Model"
-        direction TB
-        NOW2["Now"] --> CP1["Checkpoint"]
-        CP1 --> CP2["Checkpoint"]
-        CP2 --> CP3["Checkpoint"]
-    end
+```
+  ╔══════════════════════════════════╗    ╔═══════════════════════════╗
+  ║           GIT                    ║    ║          UNDU             ║
+  ╠══════════════════════════════════╣    ╠═══════════════════════════╣
+  ║                                  ║    ║                           ║
+  ║   Working Directory              ║    ║   Now                     ║
+  ║         │                        ║    ║    │                      ║
+  ║         ▼                        ║    ║    ▼                      ║
+  ║   Staging Area                   ║    ║   ● Checkpoint            ║
+  ║         │                        ║    ║    │                      ║
+  ║         ▼                        ║    ║    ▼                      ║
+  ║   Local Commits ◀─┐              ║    ║   ● Checkpoint            ║
+  ║    │    │    │    │ merge        ║    ║    │                      ║
+  ║    ▼    ▼    ▼    │              ║    ║    ▼                      ║
+  ║   main feat-1 feat-2             ║    ║   ● Checkpoint            ║
+  ║    │                             ║    ║                           ║
+  ║    ▼                             ║    ║                           ║
+  ║   Remote                         ║    ║   That's it.              ║
+  ║                                  ║    ║                           ║
+  ╚══════════════════════════════════╝    ╚═══════════════════════════╝
 ```
 
 ## AI Integration (MCP)
 
 undu includes an MCP server for Claude Code integration. Claude can directly interact with your timeline:
 
-```mermaid
-sequenceDiagram
-    participant You
-    participant Claude
-    participant undu
-
-    You->>Claude: "something broke in the last hour"
-    Claude->>undu: undu_history
-    undu-->>Claude: [checkpoints with timestamps]
-    Claude->>undu: undu_diff from="1 hour ago"
-    undu-->>Claude: [changed files]
-    Claude->>You: "Found it! auth.py line 23 was changed at 3:42pm"
-    You->>Claude: "restore it"
-    Claude->>undu: undu_goto "before auth change"
-    undu-->>Claude: ✓ restored
-    Claude->>You: "Done! Restored to before the breaking change."
+```
+  ┌─────────┐                    ┌─────────┐                    ┌─────────┐
+  │   You   │                    │ Claude  │                    │  undu   │
+  └────┬────┘                    └────┬────┘                    └────┬────┘
+       │                              │                              │
+       │  "something broke in        │                              │
+       │   the last hour"            │                              │
+       │ ───────────────────────────▶│                              │
+       │                              │                              │
+       │                              │      undu_history            │
+       │                              │ ────────────────────────────▶│
+       │                              │                              │
+       │                              │      [checkpoints]           │
+       │                              │ ◀────────────────────────────│
+       │                              │                              │
+       │                              │      undu_diff               │
+       │                              │ ────────────────────────────▶│
+       │                              │                              │
+       │                              │      [changes]               │
+       │                              │ ◀────────────────────────────│
+       │                              │                              │
+       │  "Found it! auth.py         │                              │
+       │   line 23 changed"          │                              │
+       │ ◀───────────────────────────│                              │
+       │                              │                              │
+       │  "restore it"               │                              │
+       │ ───────────────────────────▶│                              │
+       │                              │                              │
+       │                              │      undu_goto               │
+       │                              │ ────────────────────────────▶│
+       │                              │                              │
+       │                              │      ✓ restored              │
+       │                              │ ◀────────────────────────────│
+       │                              │                              │
+       │  "Done! Restored."          │                              │
+       │ ◀───────────────────────────│                              │
+       │                              │                              │
+  ─────┴──────────────────────────────┴──────────────────────────────┴─────
 ```
 
 ### Setup MCP Server
@@ -160,7 +206,7 @@ Add to your Claude Code MCP settings:
   "mcpServers": {
     "undu": {
       "command": "bun",
-      "args": ["run", "D:/Dev/Projects/Random/undu/src/mcp/server.ts"]
+      "args": ["run", "/path/to/undu/src/mcp/server.ts"]
     }
   }
 }
@@ -176,30 +222,32 @@ Add to your Claude Code MCP settings:
 
 ## How It Works
 
-```mermaid
-graph LR
-    subgraph "Your Project"
-        F1[file1.ts]
-        F2[file2.ts]
-        F3[config.json]
-    end
-
-    subgraph ".undu/"
-        DB[(undu.db<br/>SQLite)]
-        subgraph "objects/"
-            B1[a1/b2c3...]
-            B2[f7/89ab...]
-        end
-    end
-
-    F1 -->|hash| B1
-    F2 -->|hash| B2
-    F3 -->|hash| B1
-    DB -->|references| B1
-    DB -->|references| B2
+```
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  Your Project                        .undu/                         │
+  │  ─────────────                       ──────                         │
+  │                                                                     │
+  │  ┌──────────────┐                   ┌────────────────────────────┐  │
+  │  │  file1.ts    │ ───────┐          │  undu.db (SQLite)          │  │
+  │  └──────────────┘        │          │  ┌──────────────────────┐  │  │
+  │                          │  hash    │  │ checkpoints          │  │  │
+  │  ┌──────────────┐        │          │  │ files                │  │  │
+  │  │  file2.ts    │ ───────┼─────────▶│  │ timestamps           │  │  │
+  │  └──────────────┘        │          │  └──────────────────────┘  │  │
+  │                          │          └────────────────────────────┘  │
+  │  ┌──────────────┐        │                                          │
+  │  │  config.json │ ───────┘          ┌────────────────────────────┐  │
+  │  └──────────────┘                   │  objects/                  │  │
+  │                                     │  ├── a1/                   │  │
+  │                                     │  │   └── b2c3d4e5...       │  │
+  │       Same content?                 │  └── f7/                   │  │
+  │       Stored once! ─────────────────│      └── 89abcdef...       │  │
+  │       (deduplication)               └────────────────────────────┘  │
+  │                                                                     │
+  └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Storage:**
+**Storage Structure:**
 ```
 .undu/
 ├── undu.db      # SQLite database (metadata, timeline)
@@ -223,13 +271,16 @@ Edit `.undu/config.toml` to customize.
 
 ## Comparison
 
-| Task | Git | undu |
-|------|-----|------|
-| Save work | `git add -A && git commit -m "..."` | `undu save "..."` |
-| Go back | `git checkout HEAD~3` | `undu undo 3` |
-| See history | `git log --oneline` | `undu history` |
-| Undo one file | `git checkout -- file.py` | `undu undo --file file.py` |
-| What changed? | `git diff HEAD~1` | `undu diff` |
+```
+  ┌────────────────────┬─────────────────────────────────┬──────────────────┐
+  │ Task               │ Git                             │ undu             │
+  ├────────────────────┼─────────────────────────────────┼──────────────────┤
+  │ Save work          │ git add -A && git commit -m "." │ undu save "..."  │
+  │ Go back            │ git checkout HEAD~3             │ undu undo 3      │
+  │ See history        │ git log --oneline               │ undu history     │
+  │ What changed?      │ git diff HEAD~1                 │ undu diff        │
+  └────────────────────┴─────────────────────────────────┴──────────────────┘
+```
 
 ## Roadmap
 
