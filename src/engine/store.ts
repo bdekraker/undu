@@ -609,6 +609,20 @@ export class UnduStore {
   close(): void {
     this.db.close();
   }
+
+  /**
+   * Get project root path
+   */
+  getProjectRoot(): string {
+    return this.projectRoot;
+  }
+
+  /**
+   * Get ignore patterns
+   */
+  getIgnorePatterns(): string[] {
+    return [...this.ignore];
+  }
 }
 
 // Database initialization

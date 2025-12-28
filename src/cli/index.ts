@@ -6,6 +6,7 @@
 
 import { UnduStore } from "../engine";
 import type { Status, Timeline, Diff, Checkpoint } from "../engine";
+import { UnduWatcher } from "../daemon";
 import {
   style,
   sym,
@@ -32,6 +33,7 @@ const ALIASES: Record<string, string> = {
   g: 'goto',
   p: 'peek',
   i: 'init',
+  w: 'watch',
 };
 
 // Parse arguments
@@ -412,6 +414,92 @@ async function cmdPeek(target: string, json: boolean): Promise<number> {
   return 0;
 }
 
+async function cmdWatch(json: boolean): Promise<number> {
+  const result = await UnduStore.find(process.cwd());
+  if (!result.ok) {
+    if (json) jsonOutput({ ok: false, error: result.error });
+    else printError(result.error);
+    return 1;
+  }
+
+  const store = result.value;
+  const projectRoot = store.getProjectRoot();
+  const ignorePatterns = store.getIgnorePatterns();
+  const projectName = projectRoot.split(/[/\\]/).pop() || 'unknown';
+
+  if (json) {
+    // JSON mode: just output events as JSONL
+    const watcher = new UnduWatcher(store, projectRoot, ignorePatterns, {
+      debounceMs: 30000,
+      onAutoSave: (filesChanged) => {
+        console.log(JSON.stringify({
+          event: 'auto-save',
+          filesChanged,
+          timestamp: new Date().toISOString()
+        }));
+      },
+      onError: (error) => {
+        console.log(JSON.stringify({
+          event: 'error',
+          message: error.message,
+          timestamp: new Date().toISOString()
+        }));
+      }
+    });
+
+    watcher.start();
+    console.log(JSON.stringify({
+      event: 'started',
+      project: projectName,
+      debounceMs: 30000
+    }));
+
+    // Keep running until killed
+    await new Promise(() => {});
+    return 0;
+  }
+
+  // Interactive mode
+  print("");
+  print(style.bold(`  undu watching: ${projectName}`));
+  print(style.muted("  " + "━".repeat(50)));
+  print("");
+  print(`  Auto-saving every ${style.info('30 seconds')} of inactivity`);
+  print(`  Press ${style.warning('Ctrl+C')} to stop (your work is still safe)`);
+  print("");
+
+  let saveCount = 0;
+
+  const watcher = new UnduWatcher(store, projectRoot, ignorePatterns, {
+    debounceMs: 30000,
+    onAutoSave: (filesChanged) => {
+      saveCount++;
+      const time = new Date().toLocaleTimeString();
+      print(`  ${style.autosave(sym.autosave)} Auto-saved at ${time} (${filesChanged} files)`);
+    },
+    onError: (error) => {
+      printError(`Auto-save failed: ${error.message}`);
+    },
+    verbose: false
+  });
+
+  watcher.start();
+
+  // Handle Ctrl+C gracefully
+  process.on('SIGINT', () => {
+    watcher.stop();
+    store.close();
+    print("");
+    print(style.muted(`  Stopped watching. ${saveCount} auto-saves created.`));
+    print("");
+    process.exit(0);
+  });
+
+  // Keep running
+  await new Promise(() => {});
+  return 0;
+}
+
 // Main
 async function main(): Promise<number> {
   const args = process.argv.slice(2);
@@ -458,6 +546,9 @@ async function main(): Promise<number> {
 
     case 'peek':
       return cmdPeek(cmdArgs.join(' '), flags.json);
+
+    case 'watch':
+      return cmdWatch(flags.json);
 
     case 'help':
       print(HELP_TEXT);

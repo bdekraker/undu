@@ -103,6 +103,7 @@ undu goto "added user authentication"
 | `undu history` | `undu h` | Show timeline |
 | `undu diff` | `undu d` | Show changes |
 | `undu peek "name"` | `undu p "name"` | Preview checkpoint |
+| `undu watch` | `undu w` | Auto-save on changes |
 
 ## The Mental Model
 

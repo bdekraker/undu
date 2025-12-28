@@ -197,10 +197,12 @@ ${style.bold('Commands:')}
   ${style.info('history')}             Show timeline
   ${style.info('diff')}                Show changes since last save
   ${style.info('peek')} ${style.muted('<name|id>')}     Preview a checkpoint
+  ${style.info('watch')}               Auto-save on file changes
 
 ${style.bold('Aliases:')}
   ${style.muted('s')}  = save    ${style.muted('b')}  = back    ${style.muted('h')}  = history
   ${style.muted('d')}  = diff    ${style.muted('g')}  = goto    ${style.muted('p')}  = peek
+  ${style.muted('w')}  = watch
 
 ${style.bold('Options:')}
   --json              Output as JSON (for scripts/AI)
