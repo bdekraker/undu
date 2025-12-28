@@ -12,6 +12,58 @@ undu history                 # See your timeline
 
 No staging. No branches. No merge conflicts. Just save and undo.
 
+## See it in Action
+
+### Check Status
+```
+$ undu
+
+  undu │ my-project
+  ────────────────────────────────────────
+  2 files changed since "Login working"
+
+    M  src/auth.ts
+    A  src/utils.ts
+
+  Quick actions:
+    undu save "..."   Save these changes
+    undu back         Discard changes
+    undu diff         See what changed
+```
+
+### View Your Timeline
+```
+$ undu history
+
+  Your Timeline
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ◆ Now (unsaved changes)
+  │
+  ● "Added greet function and config" ─── 2 min ago
+  │
+  ◆ "Added README and updated app" ────── 5 min ago (current)
+  │
+  ○ Auto-save ─────────────────────────── 10 min ago
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Save a Checkpoint
+```
+$ undu save "Login feature complete"
+
+  ✓ Saved checkpoint: "Login feature complete"
+    ID: d7be73504005ea56
+    Files: 12
+```
+
+### Go Back
+```
+$ undu back
+
+  ✓ Restored to: "Added README and updated app"
+    5 minutes ago
+```
+
 ## Why undu?
 
 Git is powerful but complex. It was designed for coordinating thousands of Linux kernel developers. Most of us just want to:
