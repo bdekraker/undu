@@ -362,6 +362,8 @@ Auto-saves appear in your timeline as `○` (vs `●` for manual checkpoints). T
 
 - [x] Auto-save daemon (background file watching)
 - [ ] Smart large file handling (skip >50MB, auto-ignore binaries)
+- [ ] AI-powered changelogs (auto-describe what changed)
+- [ ] Interactive CLI (arrow-key navigation, visual timeline)
 - [ ] Natural language commands ("go back to when tests passed")
 - [ ] Parallel timelines (branch-like behavior)
 - [ ] Cloud sync

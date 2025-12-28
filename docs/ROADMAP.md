@@ -381,6 +381,214 @@ $ undu save
   • Conversational interface
 ```
 
+### 5. AI-Powered Auto-Changelogs
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  Instead of "Auto-save" messages, AI writes human-readable summaries:   │
+  │                                                                         │
+  │  BEFORE (boring):                                                       │
+  │    ○ Auto-save ─────────────────────── 2 min ago                        │
+  │    ○ Auto-save ─────────────────────── 5 min ago                        │
+  │    ○ Auto-save ─────────────────────── 8 min ago                        │
+  │                                                                         │
+  │  AFTER (AI-powered):                                                    │
+  │    ○ "Fixed login validation bug" ──── 2 min ago                        │
+  │    ○ "Added JWT token handling" ────── 5 min ago                        │
+  │    ○ "Refactored auth middleware" ──── 8 min ago                        │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+**How it works:**
+
+```
+  ┌───────────────┐     diff      ┌───────────────┐     prompt     ┌─────────┐
+  │  File Change  │ ────────────▶ │  Collect Diff │ ─────────────▶ │  LLM    │
+  └───────────────┘               └───────────────┘                │  API    │
+                                                                   └────┬────┘
+                                                                        │
+                                    ┌───────────────────────────────────┘
+                                    ▼
+                          "Added error handling to login endpoint"
+```
+
+**Implementation Options:**
+
+```
+  Option A: Local LLM (Ollama)
+  ───────────────────────────────────────────────────────────────────
+  • No API key needed
+  • Works offline
+  • Needs ~8GB RAM for decent model
+  • Slower but private
+
+  Option B: Cloud API (Claude/OpenAI)
+  ───────────────────────────────────────────────────────────────────
+  • Fast and high quality
+  • Requires API key
+  • Small cost per save (~$0.001)
+  • Best descriptions
+
+  Option C: Hybrid
+  ───────────────────────────────────────────────────────────────────
+  • Try local first, fall back to cloud
+  • Best of both worlds
+  • User configures preference
+```
+
+**User Experience:**
+
+```bash
+# Enable AI changelogs
+$ undu config set ai.enabled true
+$ undu config set ai.provider claude  # or ollama, openai
+
+# Now auto-saves get smart messages
+$ undu history
+
+  Your Timeline
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ◆ Now (2 files changed)
+  │
+  ○ "Added input validation to signup form" ───── 1 min ago
+  │
+  ○ "Fixed typo in error message" ─────────────── 3 min ago
+  │
+  ● "User auth complete" ──────────────────────── 10 min ago  ← manual
+  │
+  ○ "Started working on password reset" ───────── 15 min ago
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Complexity:** Medium
+- Diff collection: Already have this
+- API integration: Straightforward
+- Caching: Avoid redundant calls
+- Fallback: Graceful degradation if AI unavailable
+
+---
+
+# Feature 2.5: Interactive CLI
+
+## The Philosophy
+
+> "Show, don't tell."
+
+The terminal can be more than text. Modern CLI tools use arrow keys, colors, and
+real-time updates to create rich interactive experiences.
+
+## The Ideal Experience
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  Instead of typing commands, you navigate visually:                     │
+  │                                                                         │
+  │  $ undu                                                                 │
+  │                                                                         │
+  │  ┌─────────────────────────────────────────────────────────────────┐   │
+  │  │  Your Timeline                              ↑↓ Navigate  Enter ↵  │   │
+  │  │  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━   │   │
+  │  │                                                                   │   │
+  │  │  ◆ Now (2 files changed)                                          │   │
+  │  │  │                                                                │   │
+  │  │  ▸ ● "Login feature complete" ────────── 10 min ago   ← selected  │   │
+  │  │  │                                                                │   │
+  │  │  ○ Auto-save ────────────────────────── 15 min ago                │   │
+  │  │  │                                                                │   │
+  │  │  ● "Started auth work" ──────────────── 1 hour ago                │   │
+  │  │                                                                   │   │
+  │  │  [d] diff  [g] goto  [p] peek  [q] quit                           │   │
+  │  └─────────────────────────────────────────────────────────────────┘   │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+## Features
+
+```
+  Interactive History Browser
+  ───────────────────────────────────────────────────────────────────
+  • Arrow keys to navigate timeline
+  • Enter to select checkpoint
+  • 'd' to see diff from selected point
+  • 'g' to goto (restore) selected checkpoint
+  • 'p' to peek at files in that checkpoint
+  • 'q' to quit
+
+  Interactive Diff Viewer
+  ───────────────────────────────────────────────────────────────────
+  • Side-by-side or unified view
+  • Scroll through changes
+  • Jump between files
+  • Syntax highlighting
+
+  Interactive Save
+  ───────────────────────────────────────────────────────────────────
+  • See what will be saved
+  • Select/deselect files
+  • Edit message inline
+  • Confirm before saving
+```
+
+## Library Options
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  Ink (React for CLIs) - RECOMMENDED                                     │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • React-like components for terminal                                   │
+  │  • Used by Gatsby, Prisma, Shopify CLI                                  │
+  │  • Great for complex UIs                                                │
+  │  • npm: ink                                                             │
+  │                                                                         │
+  │  Clack - LIGHTWEIGHT OPTION                                             │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Beautiful prompts and spinners                                       │
+  │  • Very lightweight                                                     │
+  │  • Good for simpler interactions                                        │
+  │  • npm: @clack/prompts                                                  │
+  │                                                                         │
+  │  Blessed / Blessed-contrib - FULL TUI                                   │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │  • Full terminal UI framework                                           │
+  │  • Widgets, layouts, dashboards                                         │
+  │  • More complex but very powerful                                       │
+  │  • npm: blessed, blessed-contrib                                        │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+## Recommended Approach
+
+Start with **Clack** for simple interactions (prompts, selections),
+add **Ink** later for the full interactive history browser.
+
+```typescript
+// Example with Clack
+import { select, confirm } from '@clack/prompts';
+
+const checkpoint = await select({
+  message: 'Select checkpoint to restore:',
+  options: checkpoints.map(c => ({
+    value: c.id,
+    label: `${c.message} — ${timeAgo(c.timestamp)}`
+  }))
+});
+
+const confirmed = await confirm({
+  message: `Restore to "${checkpoint.message}"?`
+});
+```
+
+**Complexity:** Medium
+- Clack integration: Easy (few hours)
+- Full Ink history browser: More involved (days)
+- Cross-platform terminal support: Some quirks on Windows
+
 ---
 
 # Feature 3: Parallel Timelines (Branching)
