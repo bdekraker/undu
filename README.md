@@ -24,15 +24,20 @@ undu does exactly that. Nothing more, nothing less.
 
 ## Installation
 
-### Standalone Binary (Recommended)
-
-Download the latest release from [GitHub Releases](https://github.com/bdekraker/undu/releases) and add to your PATH.
-
-### npm
+### npm (Recommended)
 
 ```bash
 npm install -g undu
 ```
+
+Works immediately on **Windows**. On Mac/Linux, requires [Bun](https://bun.sh) runtime.
+
+### Standalone Binary
+
+Download from [GitHub Releases](https://github.com/bdekraker/undu/releases):
+- `undu-win.exe` — Windows x64
+- `undu-linux` — Linux x64
+- `undu-macos` — macOS ARM64
 
 ### From Source
 
@@ -40,8 +45,7 @@ npm install -g undu
 git clone https://github.com/bdekraker/undu.git
 cd undu
 bun install
-bun run build
-# Binary at dist/undu.exe (Windows) or dist/undu (Linux/Mac)
+bun run build:win   # or build:linux, build:macos
 ```
 
 ## Quick Start
