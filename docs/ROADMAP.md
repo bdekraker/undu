@@ -18,6 +18,86 @@
 
 ---
 
+# Feature 0.5: Auto-Init & Watch Improvements
+
+## Current Behavior
+
+```
+  Currently:
+  ───────────────────────────────────────────────────────────────────
+  • `undu init` is REQUIRED to create .undu/ directory
+  • `undu watch` is SEPARATE command (not auto-started)
+  • User must explicitly initialize and enable watching
+```
+
+## Proposed Improvements
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  IMPROVEMENT 1: Auto-Init on First Save                                 │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │                                                                         │
+  │  Instead of:                                                            │
+  │    $ undu save "first save"                                             │
+  │    Error: Not an undu repository. Run 'undu init' first.                │
+  │                                                                         │
+  │  Do this:                                                               │
+  │    $ undu save "first save"                                             │
+  │    ✓ Initialized undu in my-project/                                    │
+  │    ✓ Saved checkpoint: "first save"                                     │
+  │                                                                         │
+  │  Zero friction. Just works.                                             │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  IMPROVEMENT 2: Combined Init + Watch                                   │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │                                                                         │
+  │    $ undu init --watch                                                  │
+  │    ✓ Initialized undu in my-project/                                    │
+  │    ✓ Watching for changes...                                            │
+  │                                                                         │
+  │  Or via config:                                                         │
+  │    $ undu config set autoWatch true                                     │
+  │                                                                         │
+  │  Then any undu command auto-starts the watcher in background.           │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │                                                                         │
+  │  IMPROVEMENT 3: Background Daemon                                       │
+  │  ───────────────────────────────────────────────────────────────────    │
+  │                                                                         │
+  │  Instead of keeping terminal open with `undu watch`:                    │
+  │                                                                         │
+  │    $ undu watch --daemon                                                │
+  │    ✓ Started undu daemon (PID 12345)                                    │
+  │    ✓ Auto-saving in background                                          │
+  │                                                                         │
+  │    $ undu watch --stop                                                  │
+  │    ✓ Stopped undu daemon                                                │
+  │                                                                         │
+  │  Runs silently, survives terminal close.                                │
+  │                                                                         │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+## Design Decision
+
+Keep `init` explicit for now (user knows they're enabling version control),
+but make it more forgiving:
+- Suggest `init` when running commands in uninitialized folder
+- Add `--watch` flag to init
+- Consider auto-init as opt-in config option
+
+**Complexity:** Low (mostly UX polish)
+
+---
+
 # Feature 1: Auto-Save Daemon
 
 ## The Philosophy
