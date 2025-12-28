@@ -1,0 +1,36 @@
+# Only ignore what we don't want in the npm package
+# README.md is explicitly NOT ignored (npm should include it)
+
+# Development files
+.git
+.github
+.gitignore
+.idea
+.DS_Store
+.cache
+.eslintcache
+*.tsbuildinfo
+coverage
+*.lcov
+logs
+*.log
+
+# Test files
+tests
+__tests__
+*.test.ts
+*.spec.ts
+
+# Build artifacts we don't need
+*.tgz
+out
+
+# Config files not needed at runtime
+tsconfig.json
+bun.lockb
+.env*
+
+# Docs (README is kept, but not docs folder)
+docs
+VISION.md
+mcp-config.example.json
