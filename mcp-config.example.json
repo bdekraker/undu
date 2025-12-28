@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "undu": {
+      "command": "bun",
+      "args": ["run", "/path/to/undu/src/mcp/server.ts"],
+      "env": {}
+    }
+  }
+}
